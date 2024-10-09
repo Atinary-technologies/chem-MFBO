@@ -1,0 +1,32 @@
+hydra:
+ launcher:
+  _target_: hydra_plugins.hydra_submitit_launcher.submitit_launcher.SlurmLauncher
+  tasks_per_node: 1
+  cpus_per_task: 25
+  mem_gb: 16
+  nodes: 1
+  timeout_min: 180
+ mode: MULTIRUN
+ sweeper:
+  params:
+   optimizer: single_fidelity_ei, multi_fidelity_ei, multi_fidelity_mes, single_fidelity_mes, multi_fidelity_kg, single_fidelity_kg
+   simulation: branin, park
+ sweep:
+  dir: benchmark_results_hydra/${now:%Y%m%d%H%M%S}_synthetic_benchmark
+  subdir: ${hydra.job.override_dirname}
+
+budget: 30
+n_repeats: 20
+batch_size: 1
+init_samples_budget: 0.1
+low_fid_samps_ratio: 0.6666
+low_fid: 0.8
+cost_ratio: 0.1
+parallel: True
+optimizer: single_fidelity_ei
+simulation: hartmann
+timeout_min: 120
+cpus_per_task: 25
+tasks_per_node: 1
+mem_gb: 16
+nodes: 1

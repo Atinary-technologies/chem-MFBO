@@ -1,0 +1,12 @@
+path: benchmark_results_hydra_cluster/20240826175538_synthetic_kernel
+simulations: [branin]
+optimizers: [mes, ei]
+constraints:
+budget_steps: 30
+initial_cost: 3
+result: result
+subplots: True
+
+hydra:
+  run:
+    dir: plots/synthetic

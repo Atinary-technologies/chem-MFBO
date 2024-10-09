@@ -1,0 +1,10 @@
+path: benchmark_results_hydra_cluster/20240829120340_synthetic_sweep
+simulations: [branin, park]
+optimizers: [mes, ei]
+parameters: lowfid_kernel, cost_ratio
+extract: True
+plot: True
+
+hydra:
+  run:
+    dir: plots/

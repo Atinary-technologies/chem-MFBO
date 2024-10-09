@@ -1,0 +1,9 @@
+path: benchmark
+simulations: [polarizability, cofs, kinetic, freesolv]
+optimizers: [mf_MES, sf_MES, mf_EI, sf_EI, random]
+constraints:
+plots_path: plots/chemistry
+
+hydra:
+  run:
+    dir: plots/

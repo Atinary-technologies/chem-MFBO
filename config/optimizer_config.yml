@@ -1,0 +1,134 @@
+# Features and hyperparameters for different optimizers
+
+
+- name: multi_fidelity_mes
+
+  gp: SingleTaskMF
+
+  acquisition: mfmes
+
+  n_fantasies: 128
+
+  n_raw_samples: 128
+
+  n_restarts: 5
+
+  batch_limit: 5
+
+  max_iter: 200
+
+- name: multi_fidelity_gibbon
+
+  gp: SingleTaskMF
+
+  acquisition: mfgibbon
+
+  n_fantasies: 128
+
+  n_raw_samples: 128
+
+  n_restarts: 5
+
+  batch_limit: 5
+
+  max_iter: 200
+
+- name: multi_fidelity_kg
+
+  gp: SingleTaskMF
+
+  acquisition: mfkg
+
+  n_fantasies: 128
+
+  n_raw_samples: 128
+
+  n_restarts: 5
+
+  batch_limit: 5
+
+  max_iter: 200
+
+- name: multi_fidelity_ei
+
+  gp: SingleTaskMF
+
+  acquisition: mfei
+
+  n_fantasies: 128
+
+  n_raw_samples: 128
+
+  n_restarts: 5
+
+  batch_limit: 5
+
+  max_iter: 200
+
+
+- name: single_fidelity_kg
+
+  gp: SingleTaskSF
+
+  acquisition: kg
+
+  n_fantasies: 128
+
+  n_raw_samples: 128
+
+  n_restarts: 5
+
+  batch_limit: 5
+
+  max_iter: 200
+
+
+- name: single_fidelity_ei
+
+  gp: SingleTaskSF
+
+  acquisition: ei
+
+  n_fantasies: 128
+
+  n_raw_samples: 128
+
+  n_restarts: 5
+
+  batch_limit: 5
+
+  max_iter: 200
+
+
+- name: single_fidelity_mes
+
+  gp: SingleTaskSF
+
+  acquisition: mes
+
+  n_fantasies: 128
+
+  n_raw_samples: 512
+
+  n_restarts: 10
+
+  batch_limit: 5
+
+  max_iter: 200
+
+
+- name: single_fidelity_gibbon
+
+  gp: SingleTaskSF
+
+  acquisition: gibbon
+
+  n_fantasies: 128
+
+  n_raw_samples: 512
+
+  n_restarts: 10
+
+  batch_limit: 5
+
+  max_iter: 200

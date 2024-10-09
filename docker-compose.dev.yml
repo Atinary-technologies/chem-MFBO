@@ -1,0 +1,8 @@
+version: "3"
+
+services:
+
+  demo:
+    entrypoint: python /app/scripts/dev.py
+    volumes:
+      - "./:/app"

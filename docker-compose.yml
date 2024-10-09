@@ -1,0 +1,9 @@
+version: "3"
+
+services:
+
+  demo:
+    image: mf_kmc:latest
+    restart: always
+    volumes:
+      - './:/app'

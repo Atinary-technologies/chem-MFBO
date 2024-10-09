@@ -1,0 +1,33 @@
+name: Python test on PR
+
+# This workflow is triggered on pull requests to the repository.
+on: [pull_request]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{github.ref}}
+        ssh-key: ${{secrets.SCHWYZ}}
+        submodules: true
+
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.9'
+
+    - name: Install dependencies
+      run: |
+        pip install --upgrade pip
+        pip install .
+        pip install -r test-requirements.txt
+
+
+    - name: Run Tests
+      run: |
+        python -m pytest

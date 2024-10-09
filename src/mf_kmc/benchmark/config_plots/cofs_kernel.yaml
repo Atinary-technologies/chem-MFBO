@@ -1,0 +1,12 @@
+path: benchmark/results_cofs
+simulations: [cofs]
+optimizers: [mes, ei]
+constraints:
+budget_steps: 27
+initial_cost: 3
+subplots: True
+result: selectivity
+
+hydra:
+  run:
+    dir: plots/cofs

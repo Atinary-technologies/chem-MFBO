@@ -1,0 +1,121 @@
+#Here list of simulation_config.yml
+
+- name: hartmann_6d_discrete
+  module_name: hartmann
+
+  input_parameters:
+    - name: x0
+      low_value: 0
+      high_value: 1
+
+    - name: x1
+      low_value: 0
+      high_value: 1
+
+    - name: x2
+      low_value: 0
+      high_value: 1
+
+    - name: x3
+      low_value: 0
+      high_value: 1
+
+    - name: x4
+      low_value: 0
+      high_value: 1
+
+    - name: x5
+      low_value: 0
+      high_value: 1
+
+  fidelity:
+    name: fidelity
+    fidelity_type: discrete
+    options: [0.8, 1.0]
+    best_fidelity: 1.0
+
+  bias_lowfid: 0.8
+
+  measurements:
+    - name: result
+      low_value: 0
+      high_value: 1.0
+
+  objectives:
+    - result: max
+
+  cost_model: affine
+
+  noise: 0.00
+
+- name: branin_2d_discrete
+  module_name: branin
+
+  input_parameters:
+    - name: x0
+      low_value: -5
+      high_value: 10
+
+    - name: x1
+      low_value: 0
+      high_value: 15
+
+  fidelity:
+    name: fidelity
+    fidelity_type: discrete
+    options: [0.8, 1.0]
+    best_fidelity: 1.0
+
+  bias_lowfid: 0.3
+
+  measurements:
+    - name: result
+      low_value: -308.129096
+      high_value: -0.397887
+
+  objectives:
+    - result: max
+
+  cost_model: affine
+
+  noise: 0.0
+
+- name: park91a_4d_discrete
+  module_name: park
+
+  input_parameters:
+    - name: x0
+      low_value: 0.001
+      high_value: 1
+
+    - name: x1
+      low_value: 0
+      high_value: 1
+
+    - name: x2
+      low_value: 0
+      high_value: 1
+
+    - name: x3
+      low_value: 0
+      high_value: 1
+
+  fidelity:
+    name: fidelity
+    fidelity_type: discrete
+    options: [0.5, 1.0]
+    best_fidelity: 1.0
+
+  bias_lowfid: 0.46
+
+  measurements:
+    - name: result
+      low_value: 0.0
+      high_value: 25.5893
+
+  objectives:
+    - result: max
+
+  cost_model: affine
+
+  noise: 0.0

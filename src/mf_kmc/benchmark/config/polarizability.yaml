@@ -1,0 +1,18 @@
+hydra:
+  mode: MULTIRUN
+  sweeper:
+    params:
+      lowfid: 0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9
+
+  sweep:
+    dir: benchmark/results_polarizability
+    subdir: ${hydra.job.override_dirname}
+
+modes: [mf, sf, random]
+af_names: [EI, MES]
+cost_ratio: 0.167
+seeds: 20
+budget: 27
+lowfid: 0.0
+parallel: True
+name: data/polarizability.csv

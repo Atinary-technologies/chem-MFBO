@@ -1,0 +1,8 @@
+[tool.bandit]
+exclude_dirs = ["tests"]
+recursive = true
+
+[tool.black]
+line-length = 88
+target-version = ['py38', 'py39']
+skip-string-normalization = true
