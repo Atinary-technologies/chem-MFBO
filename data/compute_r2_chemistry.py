@@ -1,19 +1,18 @@
 """Compute r2 for each problem and generate a plot."""
 
 import os
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from numpy.random import default_rng
 from rdkit import Chem
+from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
+from sklearn.model_selection import train_test_split
 from summit.benchmarks import MIT_case2
 from summit.domain import *
-from pathlib import Path
-from sklearn.linear_model import LinearRegression
-from sklearn.model_selection import train_test_split
-
 
 
 def load_ys(problem: str, n_samps: int = 100, seed: int = 33):
@@ -79,7 +78,7 @@ def load_ys(problem: str, n_samps: int = 100, seed: int = 33):
         y_true = data["expt"].values
         y_pred = data["calc"].values
 
-    assert len(y_true) >= n_samps, f"Number of examples lower than n samples"
+    assert len(y_true) >= n_samps, "Number of examples lower than n samples"
 
     random_indices = rng.integers(0, len(y_true), size=n_samps)
 
@@ -94,7 +93,7 @@ def inchi_to_smiles(inchi: str) -> str:
     try:
         smiles = Chem.MolToSmiles(Chem.MolFromInchi(inchi))
         return smiles
-    except:
+    except Exception:
         return False
 
 
@@ -137,7 +136,7 @@ if __name__ == "__main__":
 
         if dataset == "polarizability_neg":
             rng = np.random.default_rng(seed=33)
-            y_lf = y_lf + rng.normal(loc=0, scale=1, size=(len(y_lf)))*3
+            y_lf = y_lf + rng.normal(loc=0, scale=1, size=(len(y_lf))) * 3
 
         X_train, X_test, y_train, y_test = train_test_split(y_lf, y_hf, test_size=0.5)
 

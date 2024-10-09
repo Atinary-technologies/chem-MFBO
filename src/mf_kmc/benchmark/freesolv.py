@@ -173,7 +173,7 @@ def run_experiment(
     else:
         indices_hf = diverse_set(X, init_sample, 2)
 
-    indices_lf = rng.integers(0, 608, round(1/cost_ratio))
+    indices_lf = rng.integers(0, 608, round(1 / cost_ratio))
 
     X_hf_init = X_hf[indices_hf]
     y_mf_init = y_hf[indices_hf]

@@ -86,7 +86,7 @@ class IsingCostModel(AffineFidelityCostModel):
         lin_cost = torch.einsum(
             "...f,f", X[..., self.fidelity_dims], self.weights.to(X)
         )
-        #fids = X[..., -1]
+        # fids = X[..., -1]
         final_cost = lin_cost**2.6 * 171.38 - 4.9323 * lin_cost + 0.8122
 
         return final_cost

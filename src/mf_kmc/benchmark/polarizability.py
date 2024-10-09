@@ -190,19 +190,19 @@ def run_experiment(
     X_lf = torch.cat((X, torch.ones(X.size()[0], 1) * lowfid), dim=1)
 
     if cost_ratio == 0.5:
-        y_lf = y_lf + torch.randn(y_lf.size())*3
+        y_lf = y_lf + torch.randn(y_lf.size()) * 3
 
     budget = 0
 
     init_sample = [rng.integers(0, X.shape[0])]
-    
+
     if mode == "sf" or mode == "random":
         indices_hf = diverse_set(X, init_sample, 3)
 
     else:
         indices_hf = diverse_set(X, init_sample, 2)
 
-    indices_lf = rng.integers(0, 608, round(1/cost_ratio))
+    indices_lf = rng.integers(0, 608, round(1 / cost_ratio))
 
     X_hf_init = X_hf[indices_hf]
     y_mf_init = y_hf[indices_hf]

@@ -17,7 +17,6 @@ import seaborn as sns
 from omegaconf import DictConfig
 from sklearn.metrics import auc
 
-
 # colors to use in the plotting
 COLORS_DICT = {
     "sf_ei": cm.plasma(0.1),
@@ -215,7 +214,7 @@ def compute_delta_cost(
         index = (np.abs(arr - value)).argmin()
         return index
 
-    target = min(mf_array)*2
+    target = min(mf_array) * 2
 
     mf_ind = _find_closest(mf_array, target)
     sf_ind = _find_closest(sf_array, target)
@@ -365,14 +364,16 @@ def plot_heatmap(simulations: list, optimizers: list):
             plt.xlabel('')
             plt.ylabel('')
 
-
             for ax in plt.gcf().axes:
                 ax.tick_params(
-                    axis='both', which='both',
-                    bottom=False, top=False, left=False, right=False,
-
+                    axis='both',
+                    which='both',
+                    bottom=False,
+                    top=False,
+                    left=False,
+                    right=False,
                 )
-                
+
             plt.savefig(f"plots/sweep_final/{sim}_{optim}_heatmap.png")
             plt.savefig(f"plots/sweep_final/{sim}_{optim}_heatmap.svg")
             plt.close()
@@ -383,9 +384,9 @@ def plot_heatmap(simulations: list, optimizers: list):
 
             elif sim == "park":
                 r2 = [0.09, -0.01, 0.2, 0.46, 0.73, 0.82, 0.92, 0.97, 0.99, 0.99]
-    
+
             plt.scatter(np.linspace(0, 0.9, 10), r2, s=175, c='g')
-            
+
             plt.xticks([])
             ax = plt.gca()
             ax.spines['top'].set_visible(False)

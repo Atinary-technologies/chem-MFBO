@@ -113,7 +113,7 @@ def run_experiment(
     else:
         indices_hf = diverse_set(X, init_cof, 2)
 
-    indices_lf = rng.integers(0, 608, round(1/cost_ratio))
+    indices_lf = rng.integers(0, 608, round(1 / cost_ratio))
 
     X_hf_init = X_hf[indices_hf]
     y_mf_init = y_hf[indices_hf]
@@ -254,11 +254,9 @@ def run_experiment(
     results.columns = list(f_names) + ["fidelity", "selectivity"]
     results["step"] = steps
 
-    results["cost"] = results["fidelity"].apply(
-        lambda x: 1 if x == 1.0 else cost_ratio
-    )
+    results["cost"] = results["fidelity"].apply(lambda x: 1 if x == 1.0 else cost_ratio)
 
-    #assert not results.duplicated().any(), "Df contains duplicates"
+    # assert not results.duplicated().any(), "Df contains duplicates"
 
     return results
 
@@ -311,7 +309,7 @@ def main(cfg: DictConfig) -> None:
                         seed=seed,
                         total_budget=cfg.budget,
                         cost_ratio=cfg.cost_ratio,
-                        lowfid=cfg.lowfid
+                        lowfid=cfg.lowfid,
                     )
 
                     results.to_csv(f"{run_dir}/{seed}.csv")

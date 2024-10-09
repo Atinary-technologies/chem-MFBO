@@ -189,7 +189,9 @@ def plot_benchmark_real_problems(
                 df = pd.read_csv(optim_run_dir.joinpath(f_run))
 
                 # extract simple regret
-                sr = extract_sr(df, budget_steps, results_name, fidelity_name, best=best)
+                sr = extract_sr(
+                    df, budget_steps, results_name, fidelity_name, best=best
+                )
 
                 simple_regret.append(sr)
 
@@ -224,7 +226,7 @@ def plot_benchmark_real_problems(
                 color=COLORS_DICT[name],
                 linestyle=LINESTYLE[name],
                 markersize=10,
-                linewidth=4
+                linewidth=4,
             )
 
             if name == "random":
@@ -250,13 +252,13 @@ def plot_benchmark_real_problems(
                 name_queries.extend([name] * 2)
 
         # compute discount for each AF
-        discount_mes = compute_delta_cost(mf_array=regrets["mf_mes"],
-                                          sf_array=regrets["sf_mes"],
-                                          budgets=budgets)
+        discount_mes = compute_delta_cost(
+            mf_array=regrets["mf_mes"], sf_array=regrets["sf_mes"], budgets=budgets
+        )
 
-        discount_ei = compute_delta_cost(mf_array=regrets["mf_ei"],
-                                         sf_array=regrets["sf_ei"],
-                                         budgets=budgets)
+        discount_ei = compute_delta_cost(
+            mf_array=regrets["mf_ei"], sf_array=regrets["sf_ei"], budgets=budgets
+        )
 
         plt.grid(0.8, which="both")
         plt.xlim(0, max(budgets))
@@ -270,23 +272,23 @@ def plot_benchmark_real_problems(
 
         plt.savefig(f"{plots_path}/{file}.svg")
         plt.text(
-                    0.5,
-                    0.85,
-                    f'discount mes: {discount_mes}',
-                    transform=plt.gca().transAxes,
-                    fontsize=12,
-                    verticalalignment='top',
-                )
+            0.5,
+            0.85,
+            f'discount mes: {discount_mes}',
+            transform=plt.gca().transAxes,
+            fontsize=12,
+            verticalalignment='top',
+        )
         plt.text(
-                    0.5,
-                    0.7,
-                    f'discount ei: {discount_ei}',
-                    transform=plt.gca().transAxes,
-                    fontsize=12,
-                    verticalalignment='top',
-                )
+            0.5,
+            0.7,
+            f'discount ei: {discount_ei}',
+            transform=plt.gca().transAxes,
+            fontsize=12,
+            verticalalignment='top',
+        )
         plt.savefig(f"{plots_path}/{file}.png")
-        
+
         # plot fidelity query distribution
         plot_data = pd.DataFrame(
             {
@@ -329,7 +331,7 @@ def compute_delta_cost(
     if all(sf_array) > target:
         delta = 1
         return delta
-       
+
     mf_ind = _find_closest(mf_array, target)
     sf_ind = _find_closest(sf_array, target)
     mf_cost = budgets[mf_ind]

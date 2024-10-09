@@ -191,8 +191,7 @@ def _project(X):
 
 
 def normalize_ys(X, y, mode):
-    """Min max normalize outputs, if multi-fidelity, in different scales.
-    """
+    """Min max normalize outputs, if multi-fidelity, in different scales."""
 
     if mode == "mf":
 
@@ -202,17 +201,18 @@ def normalize_ys(X, y, mode):
 
         y_hf = (y_hf - y_hf.min()) / (y_hf.max() - y_hf.min())
         y_lf = (y_lf - y_lf.min()) / (y_lf.max() - y_lf.min())
-        
+
         X_hf = X[X[..., -1] == 1]
         X_lf = X[X[..., -1] != 1]
 
         X = torch.cat((X_hf, X_lf))
         y = torch.cat((y_hf, y_lf))
-    
+
     elif mode == "sf":
         y = (y - y.min()) / (y.max() - y.min())
 
     return X, y
+
 
 def run_experiment(
     mode: str = "mf",
@@ -277,7 +277,6 @@ def run_experiment(
 
         # normalize outputs
         X, y = normalize_ys(X_init, y_init, mode)
-
 
         if mode == "mf":
             model = SingleTaskMultiFidelityGP(
@@ -486,4 +485,3 @@ def main(cfg: DictConfig) -> None:
 if __name__ == "__main__":
 
     main()
-

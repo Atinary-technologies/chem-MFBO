@@ -206,7 +206,7 @@ def plot_benchmark_synthetic_functions(
                 linestyle=LINESTYLE[name],
                 linewidth=4,
                 marker=MARKERS[name],
-                markersize=10
+                markersize=10,
             )
 
             plt.fill_between(
@@ -223,14 +223,13 @@ def plot_benchmark_synthetic_functions(
                 name_queries.extend([name] * 2)
 
         # compute discount for each AF
-        discount_mes = compute_delta_cost(mf_array=regrets["mf_mes"],
-                                          sf_array=regrets["sf_mes"],
-                                          budgets=budget_steps)
+        discount_mes = compute_delta_cost(
+            mf_array=regrets["mf_mes"], sf_array=regrets["sf_mes"], budgets=budget_steps
+        )
 
-        discount_ei = compute_delta_cost(mf_array=regrets["mf_ei"],
-                                         sf_array=regrets["sf_ei"],
-                                         budgets=budget_steps)
-
+        discount_ei = compute_delta_cost(
+            mf_array=regrets["mf_ei"], sf_array=regrets["sf_ei"], budgets=budget_steps
+        )
 
         plt.xlim(0, max(budgets))
         plt.grid(0.8)
@@ -244,23 +243,23 @@ def plot_benchmark_synthetic_functions(
         plt.savefig(f"{plots_path}/plot_{simulation}_normal.png")
         plt.yscale("log")
         plt.savefig(f"{plots_path}/plot_{simulation}.svg")
-  
+
         plt.text(
-                    0.5,
-                    0.85,
-                    f'discount mes: {discount_mes}',
-                    transform=plt.gca().transAxes,
-                    fontsize=12,
-                    verticalalignment='top',
-                )
+            0.5,
+            0.85,
+            f'discount mes: {discount_mes}',
+            transform=plt.gca().transAxes,
+            fontsize=12,
+            verticalalignment='top',
+        )
         plt.text(
-                    0.5,
-                    0.7,
-                    f'discount ei: {discount_ei}',
-                    transform=plt.gca().transAxes,
-                    fontsize=12,
-                    verticalalignment='top',
-                )
+            0.5,
+            0.7,
+            f'discount ei: {discount_ei}',
+            transform=plt.gca().transAxes,
+            fontsize=12,
+            verticalalignment='top',
+        )
 
         plt.savefig(f"{plots_path}/plot_{simulation}.png")
 
@@ -300,7 +299,7 @@ def compute_delta_cost(
         index = (np.abs(arr - value)).argmin()
         return index
 
-    target = min(mf_array)*2
+    target = min(mf_array) * 2
 
     mf_ind = _find_closest(mf_array, target)
     sf_ind = _find_closest(sf_array, target)

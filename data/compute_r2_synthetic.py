@@ -1,21 +1,25 @@
-import torch
-from mf_kmc.simulations.implementations.park.park import Park
-from botorch.test_functions import AugmentedHartmann, AugmentedBranin
-from sklearn.metrics import r2_score
-from sklearn.linear_model import LinearRegression
-from sklearn.model_selection import train_test_split
-import numpy as np
-import matplotlib.pyplot as plt
 import os
 from pathlib import Path
+
+import matplotlib.pyplot as plt
+import numpy as np
+import torch
+from botorch.test_functions import AugmentedBranin, AugmentedHartmann
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import r2_score
+from sklearn.model_selection import train_test_split
+
+from mf_kmc.simulations.implementations.park.park import Park
 
 torch.manual_seed(33)
 
 N_SAMPS = 100
 
-simulations = {"branin": [AugmentedBranin(), 2], 
-               "park": [Park(), 4],
-               "hartmann": [AugmentedHartmann(), 6]}
+simulations = {
+    "branin": [AugmentedBranin(), 2],
+    "park": [Park(), 4],
+    "hartmann": [AugmentedHartmann(), 6],
+}
 
 
 l_levels = np.linspace(0, 0.9, 10)
@@ -38,14 +42,20 @@ if __name__ == "__main__":
 
         for i, l in enumerate(l_levels):
 
-            s_lf = torch.cat((samples, torch.ones(samples.size()[0]).unsqueeze(1)*l), dim=1)
-            s_hf = torch.cat((samples, torch.ones(samples.size()[0]).unsqueeze(1)*1.0), dim=1)
+            s_lf = torch.cat(
+                (samples, torch.ones(samples.size()[0]).unsqueeze(1) * l), dim=1
+            )
+            s_hf = torch.cat(
+                (samples, torch.ones(samples.size()[0]).unsqueeze(1) * 1.0), dim=1
+            )
             s = problem(s_lf).detach().numpy()
             s_true = problem(s_hf).detach().numpy()
 
             r2_raw = r2_score(s_true, s)
             corr = np.corrcoef(s, s_true)[0][1]
-            X_train, X_test, y_train, y_test = train_test_split(s, s_true, test_size=0.5)
+            X_train, X_test, y_train, y_test = train_test_split(
+                s, s_true, test_size=0.5
+            )
 
             linear = LinearRegression()
 
@@ -55,12 +65,12 @@ if __name__ == "__main__":
 
             r2 = r2_score(y_test, y_pred)
 
-            n_row = i//5
-            n_col = i%5
+            n_row = i // 5
+            n_col = i % 5
 
             axes[n_row, n_col].scatter(s, s_true)
 
-            #axes[n_row, n_col].text(0.1, 0.9, f"r2_raw: {round(r2_raw, 3)}")
+            # axes[n_row, n_col].text(0.1, 0.9, f"r2_raw: {round(r2_raw, 3)}")
             # axes[n_row, n_col].text(0.8, 0.9, f"corr: {round(corr, 3)}")
             axes[n_row, n_col].text(0.9, 2, f"r2: {round(r2, 3)}")
 
