@@ -396,7 +396,7 @@ def extract_name_dict(folder_path: str) -> Dict[str, str]:
     return d
 
 
-@hydra.main(version_base=None, config_path="config_plots", config_name="synthetic")
+@hydra.main(version_base=None, config_path="../../../config_plots", config_name="synthetic")
 def main(cfg: DictConfig):
 
     for path in cfg.path:
