@@ -57,6 +57,7 @@ class MultiFidelityOptimizer:
         self.cost_aware_utility = cost_aware_utility
         self.n_samples = n_samples
         self.acquisition = optim_config.acquisition
+        self.gp = optim_config.gp
 
         self.tkwargs = {
             "dtype": torch.double,
@@ -212,9 +213,16 @@ class MultiFidelityOptimizer:
         X_train = (X_train - self.bounds[0]) / (self.bounds[1] - self.bounds[0])
 
         # selection step
+        if self.gp == "multitask":
+            multitask = True
+        else:
+            multitask = False
 
         # get model and mll
-        mll, model = initialize_model(X_train, y_train, self.fidelity_dimension)
+        mll, model = initialize_model(X_train, 
+                                      y_train, 
+                                      self.fidelity_dimension, 
+                                      multitask=multitask)
 
         fit_gpytorch_mll(mll)
 
@@ -255,6 +263,7 @@ class MultiFidelityOptimizer:
                     self.cost_aware_utility,
                     self.target_fids,
                     self.optim_config.n_fantasies,
+                    multitask=multitask
                 )
 
             elif self.acquisition == "mfgibbon":
@@ -273,7 +282,10 @@ class MultiFidelityOptimizer:
                 y_max = y_train[X_train[..., -1] == 1.0].max().item()
 
                 af = CostMultiFidelityEI(
-                    model, best_f=y_max, cost_model=self.cost_model
+                    model, 
+                    best_f=y_max, 
+                    cost_model=self.cost_model,
+                    multitask=multitask
                 )
 
             # optimize AF
@@ -283,7 +295,6 @@ class MultiFidelityOptimizer:
                     [[0] * self.n_dimensions, [1] * self.n_dimensions],
                     **self.tkwargs,
                 ),
-                # bounds=self.bounds,
                 fixed_features_list=self.features_list,
                 q=batch_size,
                 num_restarts=self.optim_config.n_restarts,

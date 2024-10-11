@@ -23,7 +23,7 @@ def save_results(
     results_df.to_csv(run_dir)
 
 
-@hydra.main(version_base=None, config_path="config", config_name="synthetic_benchmark")
+@hydra.main(version_base=None, config_path="../../../config_bench", config_name="synthetic_benchmark")
 def run_benchmark(cfg: DictConfig) -> None:
     """Run benchmark using Hydra's configuration file."""
 
@@ -65,6 +65,7 @@ def run_benchmark(cfg: DictConfig) -> None:
                 batch_size=cfg.batch_size,
                 lowfid_kernel=cfg.lowfid_kernel,
                 bias_lowfid=cfg.bias_lowfid,
+                multitask=cfg.multitask,
                 seed=seed,
             )
             for seed in seeds
@@ -86,6 +87,7 @@ def run_benchmark(cfg: DictConfig) -> None:
                 batch_size=cfg.batch_size,
                 lowfid_kernel=cfg.lowfid_kernel,
                 bias_lowfid=cfg.bias_lowfid,
+                multitask=cfg.multitask,
                 seed=seed,
             )
 

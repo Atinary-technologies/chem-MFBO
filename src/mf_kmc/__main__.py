@@ -22,8 +22,9 @@ def run(
     cost_ratio: float = 0.2,
     init_samples_budget: float = 0.1,
     low_fid_samps_ratio: float = 0.6,
-    lowfid_kernel: float = None,
+    lowfid_kernel: float = 0,
     bias_lowfid: float = None,
+    multitask: bool = False,
     batch_size: int = 1,
     seed: int = 33,
 ) -> Dict[str, Any]:
@@ -53,6 +54,8 @@ def run(
 
         bias_lowfid: float, optional parameter to modify the low fidelity simulation bias.
 
+        multitask: bool, whether to use a MultiTaskGP or the SingleFidelityGP 
+
         batch_size: int, batch size for the new recommendations, defaults to 1
                     (we have not tested more values for the moment).
 
@@ -77,11 +80,15 @@ def run(
     if bias_lowfid:
         sim_config.bias_lowfid = bias_lowfid
 
+    # modify multitask kernel if necessary
+    if multitask:
+        optim_config.gp = "multitask"
+
     # accesing singleton, generate
     simulation = sim_factory(sim_config)
 
     # HERE WE CAN EDIT THE FIDELITY OPTIONS DIRECTLY ON THE OPTIM CONFIG FILE
-    if lowfid_kernel:
+    if lowfid_kernel != None:
         sim_config.fidelity.options = [lowfid_kernel, 1.0]
 
     # use a config factory (we need sim config because some things as target
@@ -134,7 +141,7 @@ def run(
 
         new_points = optimizer.recommend(
             inputs=experiments,
-            batch_size=batch_size,
+            batch_size=batch_size
         )
 
         # Here compute costs
@@ -171,14 +178,15 @@ def main():
     logging.info('Running simulation')
     run(
         'park',
-        'multi_fidelity_ei',
+        'multi_fidelity_mes',
         budget=30,
         batch_size=1,
         cost_ratio=0.05,
         init_samples_budget=0.1,
         low_fid_samps_ratio=0.66,
-        lowfid_kernel=0.2,
+        lowfid_kernel=0.0,
         bias_lowfid=0.3,
+        multitask=True,
         seed=0,
     )
 
