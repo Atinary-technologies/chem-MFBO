@@ -1,6 +1,6 @@
-import torch
-
 from typing import Dict, List, Tuple
+
+import torch
 from botorch.acquisition import ExpectedImprovement, PosteriorMean
 from botorch.acquisition.cost_aware import InverseCostWeightedUtility
 from botorch.acquisition.fixed_feature import FixedFeatureAcquisitionFunction
@@ -9,11 +9,11 @@ from botorch.acquisition.max_value_entropy_search import (
     qMultiFidelityLowerBoundMaxValueEntropy,
     qMultiFidelityMaxValueEntropy,
 )
+from botorch.acquisition.objective import ScalarizedPosteriorTransform
 from botorch.acquisition.utils import project_to_target_fidelity
 from botorch.models.cost import AffineFidelityCostModel
 from botorch.models.gp_regression_fidelity import SingleTaskMultiFidelityGP
 from botorch.optim.optimize import optimize_acqf
-from botorch.acquisition.objective import ScalarizedPosteriorTransform
 from torch import Tensor
 
 
@@ -22,16 +22,20 @@ class CostMultiFidelityEI(ExpectedImprovement):
 
     ref: https://link.springer.com/content/pdf/10.1007/s00158-005-0587-0.pdf"""
 
-    def __init__(self, model, best_f, cost_model, multitask=False, **kwargs):
+    def __init__(self, model, best_f, cost_model, multitask=True, **kwargs):
         if multitask:
             posterior_transform = ScalarizedPosteriorTransform(torch.tensor([1]))
-            super().__init__(model=model, best_f=best_f, posterior_transform=posterior_transform)
-            self.af_old = ExpectedImprovement(self.model, best_f=self.best_f, posterior_transform=posterior_transform)
-        else:    
+            super().__init__(
+                model=model, best_f=best_f, posterior_transform=posterior_transform
+            )
+            self.af_old = ExpectedImprovement(
+                self.model, best_f=self.best_f, posterior_transform=posterior_transform
+            )
+        else:
             super().__init__(model=model, best_f=best_f)
+            self.af_old = ExpectedImprovement(self.model, best_f=self.best_f)
 
         self.cost_model = cost_model
-        self.af_old = ExpectedImprovement(self.model, best_f=self.best_f)
 
     def _compute_correlation(self, X: torch.Tensor) -> torch.Tensor:
         """Compute correlation between methods"""
@@ -198,7 +202,7 @@ def get_mfmes(
     cost_function: InverseCostWeightedUtility,
     target_fidelities: Dict[int, float],
     n_fantasies: int,
-    multitask: bool = False
+    multitask: bool = False,
 ) -> qMultiFidelityMaxValueEntropy:
     """Get Multi FIdelity Max Value Entropy acquisition function"""
 
@@ -214,16 +218,16 @@ def get_mfmes(
             cost_aware_utility=cost_function,
             project=_project,
             candidate_set=candidates,
-            posterior_transform=posterior_transform
+            posterior_transform=posterior_transform,
         )
-    
+
     else:
         af = qMultiFidelityMaxValueEntropy(
             model=model,
             num_fantasies=n_fantasies,
             cost_aware_utility=cost_function,
             project=_project,
-            candidate_set=candidates
+            candidate_set=candidates,
         )
 
     return af
