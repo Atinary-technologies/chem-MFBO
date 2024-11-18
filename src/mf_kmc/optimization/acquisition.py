@@ -1,4 +1,3 @@
-# SAME THING WITH THE ACQUISITION (get_mfkg)
 from typing import Dict, List, Tuple
 
 import torch
@@ -10,6 +9,7 @@ from botorch.acquisition.max_value_entropy_search import (
     qMultiFidelityLowerBoundMaxValueEntropy,
     qMultiFidelityMaxValueEntropy,
 )
+from botorch.acquisition.objective import ScalarizedPosteriorTransform
 from botorch.acquisition.utils import project_to_target_fidelity
 from botorch.models.cost import AffineFidelityCostModel
 from botorch.models.gp_regression_fidelity import SingleTaskMultiFidelityGP
@@ -22,10 +22,20 @@ class CostMultiFidelityEI(ExpectedImprovement):
 
     ref: https://link.springer.com/content/pdf/10.1007/s00158-005-0587-0.pdf"""
 
-    def __init__(self, model, best_f, cost_model, **kwargs):
-        super().__init__(model=model, best_f=best_f, **kwargs)
+    def __init__(self, model, best_f, cost_model, multitask=True, **kwargs):
+        if multitask:
+            posterior_transform = ScalarizedPosteriorTransform(torch.tensor([1]))
+            super().__init__(
+                model=model, best_f=best_f, posterior_transform=posterior_transform
+            )
+            self.af_old = ExpectedImprovement(
+                self.model, best_f=self.best_f, posterior_transform=posterior_transform
+            )
+        else:
+            super().__init__(model=model, best_f=best_f)
+            self.af_old = ExpectedImprovement(self.model, best_f=self.best_f)
+
         self.cost_model = cost_model
-        self.af_old = ExpectedImprovement(self.model, best_f=self.best_f)
 
     def _compute_correlation(self, X: torch.Tensor) -> torch.Tensor:
         """Compute correlation between methods"""
@@ -73,25 +83,6 @@ class CostMultiFidelityEI(ExpectedImprovement):
         return alpha.flatten()
 
 
-class IsingCostModel(AffineFidelityCostModel):
-
-    """Class to model specific Ising cost according to the polynomial fit of
-    the fidelities."""
-
-    def __init__(self, fidelity_weights: Dict[int, float]):
-        super().__init__(fidelity_weights, fixed_cost=0)
-
-    def forward(self, X: Tensor):
-
-        lin_cost = torch.einsum(
-            "...f,f", X[..., self.fidelity_dims], self.weights.to(X)
-        )
-        # fids = X[..., -1]
-        final_cost = lin_cost**2.6 * 171.38 - 4.9323 * lin_cost + 0.8122
-
-        return final_cost
-
-
 class AffineModifiedCostModel(AffineFidelityCostModel):
 
     """Class to model cost for two levels of fidelities based on
@@ -129,13 +120,6 @@ def get_cost_function(
         cost_model = AffineModifiedCostModel(
             fidelity_weights=fidelity_weights, fixed_cost=0, cost_ratio=cost_ratio
         )
-        cost_aware_utility = InverseCostWeightedUtility(cost_model=cost_model)
-
-        return cost_model, cost_aware_utility
-
-    elif cost_model == "ising":
-        cost_model = IsingCostModel(fidelity_weights=fidelity_weights)
-
         cost_aware_utility = InverseCostWeightedUtility(cost_model=cost_model)
 
         return cost_model, cost_aware_utility
@@ -218,19 +202,35 @@ def get_mfmes(
     cost_function: InverseCostWeightedUtility,
     target_fidelities: Dict[int, float],
     n_fantasies: int,
+    multitask: bool = False,
 ) -> qMultiFidelityMaxValueEntropy:
     """Get Multi FIdelity Max Value Entropy acquisition function"""
 
     def _project(X):
         return project_to_target_fidelity(X=X, target_fidelities=target_fidelities)
 
-    return qMultiFidelityMaxValueEntropy(
-        model=model,
-        num_fantasies=n_fantasies,
-        cost_aware_utility=cost_function,
-        project=_project,
-        candidate_set=candidates,
-    )
+    if multitask:
+        posterior_transform = ScalarizedPosteriorTransform(torch.tensor([1]))
+
+        af = qMultiFidelityMaxValueEntropy(
+            model=model,
+            num_fantasies=n_fantasies,
+            cost_aware_utility=cost_function,
+            project=_project,
+            candidate_set=candidates,
+            posterior_transform=posterior_transform,
+        )
+
+    else:
+        af = qMultiFidelityMaxValueEntropy(
+            model=model,
+            num_fantasies=n_fantasies,
+            cost_aware_utility=cost_function,
+            project=_project,
+            candidate_set=candidates,
+        )
+
+    return af
 
 
 def get_mfgibbon(

@@ -5,4 +5,4 @@
 #SBATCH --cpus-per-task=25
 #SBATCH --mem=16G
 source venv/bin/activate # Activate your virtual environment
-python src/mf_kmc/benchmark/benchmark.py hydra/launcher=submitit_slurm --config-name=synthetic_benchmark_hartmann.yaml
+python src/mf_kmc/benchmark/benchmark.py hydra/launcher=submitit_slurm --config-name=synthetic_benchmark.yaml

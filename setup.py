@@ -11,7 +11,7 @@ setup(
     author=__author__,
     version=__version__,
     author_email="vsabanzagil@atinary.com",
-    description="Multi-fidelity BO for kinetic monte carlo simulations",
+    description="Multi-fidelity BO for molecule and materials problems",
     # implement entry point here
     package_dir={"": "src"},
     packages=find_packages(where="src"),
@@ -24,7 +24,6 @@ setup(
         "torch==2.2.1",
         "jaxtyping==0.2.28",
         "pydantic==2.6.4",
-        "torch==2.2.1",
         "hydra-core",
         "seaborn",
         "scipy==1.12.0",

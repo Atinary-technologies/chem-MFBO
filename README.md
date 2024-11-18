@@ -57,6 +57,12 @@ The negative cases can be launched with this commands
 python src/mf_kmc/benchmark/polarizability.py --config-name=polarizability_bad
 ```
 
+### 📈 Plotting
+To plot the benchmarks results, include the corresponding results path in the `path` option of the corresponding plotting config file included in `config_plots/` and run the associated plotting script. As an example, the synthetic functions benchmark can be run with:
+
+```
+python src/mf_kmc/benchmark/plot_synthetic.py
+```
 
 ### 🌟 Acknowledgements
 This work was created in a collaboration between [Atinary Technologies Inc.](https://atinary.com/) and [LIAC](https://github.com/schwallergroup) - [LPDC](https://github.com/luterbachergroup), as part of the [EPFLglobaLeaders](https://www.epfl.ch/education/phd/doctoral-studies-structure/customized-curricula/epflglobaleaders/) program. The project was funded by [NCCR Catalysis](https://www.nccr-catalysis.ch/) (grant number 180544), a National Centre of Competence in Research funded by the Swiss National Science Foundation, and by the the European Union’s Horizon 2020 research and innovation program under the Marie Skłodowska-Curie grant agreement N° 945363.
