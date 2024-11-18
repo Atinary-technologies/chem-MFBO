@@ -24,12 +24,10 @@ setup(
         "torch==2.2.1",
         "jaxtyping==0.2.28",
         "pydantic==2.6.4",
-        "torch==2.2.1",
         "hydra-core",
         "seaborn",
         "scipy==1.12.0",
         "scikit-learn==1.2.0",
-        "pytorch-cuda==12.1",
         "plotly",
         "rdkit"
         # any other ones here
