@@ -20,7 +20,7 @@ setup(
         "pandas==1.5.3",
         "pyyaml",
         "tqdm",
-        "botorch==0.11.3",
+        "botorch==0.10.0",
         "torch==2.2.1",
         "jaxtyping==0.2.28",
         "pydantic==2.6.4",
