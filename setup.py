@@ -29,7 +29,7 @@ setup(
         "seaborn",
         "scipy==1.12.0",
         "scikit-learn==1.2.0",
-        "pytorch-cuda=12.1",
+        "pytorch-cuda==12.1",
         "plotly",
         "rdkit"
         # any other ones here
