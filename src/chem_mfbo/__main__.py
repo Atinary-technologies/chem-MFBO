@@ -6,10 +6,10 @@ from typing import Any, Dict
 import numpy as np
 import torch
 
-from mf_kmc.optimization.factory import optim_factory
-from mf_kmc.optimization.sampling import sample_points
-from mf_kmc.simulations import config
-from mf_kmc.simulations.implementations.factory import sim_factory
+from chem_mfbo.optimization.factory import optim_factory
+from chem_mfbo.optimization.sampling import sample_points
+from chem_mfbo.simulations import config
+from chem_mfbo.simulations.implementations.factory import sim_factory
 
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)

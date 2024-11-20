@@ -1,4 +1,3 @@
-"""Data taken from https://doi.org/10.1007/s10822-014-9747-x"""
 import os
 import random
 import shutil
@@ -23,19 +22,18 @@ from botorch.models.transforms.outcome import Standardize
 from gpytorch.mlls import ExactMarginalLogLikelihood
 from joblib import Parallel, delayed
 from omegaconf import DictConfig
-from rdkit import Chem
-from rdkit.Chem import MACCSkeys
-from rdkit.Chem.Descriptors import CalcMolDescriptors
-from sklearn.decomposition import PCA
 from torch import Tensor
 
-from mf_kmc.optimization.acquisition import CostMultiFidelityEI
+from chem_mfbo.optimization.acquisition import CostMultiFidelityEI
 
 
 class FixedCostFids(AffineFidelityCostModel):
-    """Class to model specific cost of the problem."""
+    """Class to model specific Ising cost according to the polynomial fit of
+    the fidelities."""
 
-    def __init__(self, fidelity_weights: Dict[int, float], fixed_cost=0, min_cost=0.5):
+    def __init__(
+        self, fidelity_weights: Dict[int, float], fixed_cost=0, min_cost=0.065
+    ):
         super().__init__(fidelity_weights, fixed_cost)
         self.min_cost = min_cost
 
@@ -46,77 +44,6 @@ class FixedCostFids(AffineFidelityCostModel):
         final_cost = torch.where(fids != 1.0, self.min_cost, fids)
 
         return final_cost
-
-
-def encode_fps(smiles: list[str]) -> np.array:
-    """Encode SMILES as fps"""
-
-    mols = [Chem.MolFromSmiles(smile) for smile in smiles]
-
-    fps = np.array([MACCSkeys.GenMACCSKeys(mol) for mol in mols])
-
-    pca = PCA(n_components=20)
-
-    fps = pca.fit_transform(fps)
-
-    fps = (fps - np.min(fps, axis=0)) / (np.max(fps, axis=0) - np.min(fps, axis=0))
-
-    return fps
-
-
-def encode_descriptors(smiles: list[str]) -> np.array:
-    """Encode SMILES as descriptors"""
-
-    mols = [Chem.MolFromSmiles(smile) for smile in smiles]
-
-    desc = [CalcMolDescriptors(mol) for mol in mols]
-
-    desc_df = pd.DataFrame(desc)
-
-    desc_arr = desc_df.to_numpy()
-
-    pca = PCA(n_components=10)
-
-    fps = pca.fit_transform(desc_arr)
-
-    fps = (fps - np.min(fps, axis=0)) / (np.max(fps, axis=0) - np.min(fps, axis=0))
-
-    return fps
-
-
-def inchi_to_smiles(inchi: str) -> str:
-    """Transform Inchi into SMILES"""
-    try:
-        smiles = Chem.MolToSmiles(Chem.MolFromInchi(inchi))
-        return smiles
-    except:
-        return False
-
-
-def has_carbon(smiles: str) -> bool:
-    """Check if molecule contains the alkyl motif"""
-    mol = Chem.MolFromSmiles(smiles)
-    carb = mol.HasSubstructMatch(Chem.MolFromSmarts("[#6][#6]"))
-
-    return carb
-
-
-def data_to_input(path: str) -> pd.DataFrame:
-    """Preprocess molecules from a given dataset and get
-    tensors for computation with fps"""
-
-    df = pd.read_csv(path)
-
-    # take only SMILES, calc and DR columns
-    df = df[["calc", "expt", "smiles"]].reset_index()
-
-    # encode fps
-    X = torch.tensor(encode_descriptors(df["smiles"]), dtype=torch.float64)
-
-    y_lf = torch.tensor(-df["calc"], dtype=torch.float64).unsqueeze(1)
-    y_hf = torch.tensor(-df["expt"], dtype=torch.float64).unsqueeze(1)
-
-    return X, y_hf, y_lf
 
 
 def diverse_set(X, seed_cof, train_size):
@@ -141,13 +68,12 @@ def diverse_set(X, seed_cof, train_size):
 
 
 def run_experiment(
-    path: str,
     mode: str = "mf",
     seed: int = 33,
     af_name: str = "MES",
     total_budget: int = 5,
-    cost_ratio: float = 0.167,
-    lowfid: float = 0.82,
+    cost_ratio: float = 0.065,
+    lowfid=0.85,
 ):
 
     torch.manual_seed(seed)
@@ -158,20 +84,34 @@ def run_experiment(
         cost_model = FixedCostFids(fidelity_weights={-1: 1.0}, min_cost=cost_ratio)
         cost_aware = InverseCostWeightedUtility(cost_model=cost_model)
 
-    X, y_hf, y_lf = data_to_input(path)
+    df = pd.read_csv("data/converted_data_raw.csv")
+
+    f_names = df.columns[1:15]
+
+    df[f_names] = (df[f_names] - df[f_names].min()) / (
+        df[f_names].max() - df[f_names].min()
+    )
+
+    df[f_names]
+
+    X = torch.tensor(df[f_names].to_numpy())
+    y_hf = torch.tensor(df['gcmc_y']).unsqueeze(1)
+    y_lf = torch.tensor(df['henry_y']).unsqueeze(1)
 
     X_hf = torch.cat((X, torch.ones(X.size()[0], 1)), dim=1)
     X_lf = torch.cat((X, torch.ones(X.size()[0], 1) * lowfid), dim=1)
 
     budget = 0
 
-    init_sample = [rng.integers(0, X.shape[0])]
+    # same initialization strategy than them (sample one random cofs and then select diverse ones)
+
+    init_cof = [rng.integers(0, 608)]
 
     if mode == "sf" or mode == "random":
-        indices_hf = diverse_set(X, init_sample, 3)
+        indices_hf = diverse_set(X, init_cof, 3)
 
     else:
-        indices_hf = diverse_set(X, init_sample, 2)
+        indices_hf = diverse_set(X, init_cof, 2)
 
     indices_lf = rng.integers(0, 608, round(1 / cost_ratio))
 
@@ -194,6 +134,7 @@ def run_experiment(
     X_init = torch.cat((X_lf_init, X_hf_init))
     y_init = torch.cat((y_sf_init, y_mf_init))
 
+    # the rest
     X_rest = torch.cat((X_hf_rest, X_lf_rest))
     y_rest = torch.cat((y_hf_rest, y_lf_rest))
 
@@ -203,10 +144,10 @@ def run_experiment(
         y_init = y_mf_init
         y_rest = y_hf_rest
 
-    steps = [0] * X_hf_init.size()[0]
+    steps = [0, 0, 0]
 
     if mode == "mf":
-        steps = [0] * (X_hf_init.size()[0]) + [0] * len(indices_lf)
+        steps = [0, 0] + [0] * len(indices_lf)
 
     step = 0
 
@@ -232,11 +173,11 @@ def run_experiment(
             fit_gpytorch_mll(mll)
 
             if af_name == "MES":
-                sampler = torch.quasirandom.SobolEngine(dimension=X.shape[1])
+                sampler = torch.quasirandom.SobolEngine(dimension=14)
 
-                candidates = sampler.draw(2000)
+                candidates = sampler.draw(1000)
 
-                candidates = torch.cat((candidates, torch.ones(2000, 1)), dim=1)
+                candidates = torch.cat((candidates, torch.ones(1000, 1)), dim=1)
 
                 af = qMultiFidelityMaxValueEntropy(
                     model,
@@ -262,7 +203,7 @@ def run_experiment(
 
             if af_name == "MES":
 
-                sampler = torch.quasirandom.SobolEngine(dimension=X.shape[1])
+                sampler = torch.quasirandom.SobolEngine(dimension=14)
 
                 candidates = sampler.draw(2000)
 
@@ -281,8 +222,7 @@ def run_experiment(
                 af = ExpectedImprovement(model=model, best_f=best_y)
 
         if mode == "random":
-            # select best candidate randomly
-            best = rng.integers(low=0, high=X_rest.size()[0], size=1)[0]
+            best = rng.integers(0, X_rest.size()[0])
 
         else:
             best = af(X_rest.unsqueeze(1)).argmax()
@@ -307,24 +247,21 @@ def run_experiment(
         budget += cost
 
     xs = pd.DataFrame(X_init.detach().numpy())
-    ys = pd.DataFrame(y_init.detach().numpy()).rename(columns={0: "solvation"})
+    ys = pd.DataFrame(y_init.detach().numpy())
 
     results = pd.concat((xs, ys), axis=1)
 
-    results.rename(columns={X.shape[1]: "fidelity"}, inplace=True)
-
+    results.columns = list(f_names) + ["fidelity", "selectivity"]
     results["step"] = steps
 
-    results["cost"] = results["fidelity"].apply(
-        lambda x: 1 if x == 1.0 else cost_model.min_cost
-    )
+    results["cost"] = results["fidelity"].apply(lambda x: 1 if x == 1.0 else cost_ratio)
 
-    assert not results.duplicated().any(), "Df contains duplicates"
+    # assert not results.duplicated().any(), "Df contains duplicates"
 
     return results
 
 
-@hydra.main(version_base=None, config_path="config", config_name="freesolv")
+@hydra.main(version_base=None, config_path="config", config_name="cofs")
 def main(cfg: DictConfig) -> None:
 
     seeds = list(range(cfg.seeds))
@@ -349,7 +286,6 @@ def main(cfg: DictConfig) -> None:
 
                 results_list = Parallel(n_jobs=-1)(
                     delayed(run_experiment)(
-                        cfg.name,
                         mode=mode,
                         af_name=af_name,
                         seed=seed,
@@ -368,7 +304,6 @@ def main(cfg: DictConfig) -> None:
                 for seed in seeds:
 
                     results = run_experiment(
-                        cfg.name,
                         mode=mode,
                         af_name=af_name,
                         seed=seed,

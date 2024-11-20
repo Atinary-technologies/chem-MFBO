@@ -1,11 +1,11 @@
 """Import optimizer dynamically from config.py."""
 from typing import Union
 
-from mf_kmc.optimization.acquisition import get_cost_function
-from mf_kmc.optimization.optimizer_config import OptimizerConfig
-from mf_kmc.optimization.optimizer_mf import MultiFidelityOptimizer
-from mf_kmc.optimization.optimizer_sf import SingleFidelityOptimizer
-from mf_kmc.simulations.config import SimulationConfig
+from chem_mfbo.optimization.acquisition import get_cost_function
+from chem_mfbo.optimization.optimizer_config import OptimizerConfig
+from chem_mfbo.optimization.optimizer_mf import MultiFidelityOptimizer
+from chem_mfbo.optimization.optimizer_sf import SingleFidelityOptimizer
+from chem_mfbo.simulations.config import SimulationConfig
 
 
 def optim_factory(

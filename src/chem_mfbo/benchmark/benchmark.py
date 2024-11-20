@@ -9,8 +9,8 @@ import pandas as pd
 from joblib import Parallel, delayed
 from omegaconf import DictConfig
 
-from mf_kmc import run
-from mf_kmc.simulations import config
+from chem_mfbo import run
+from chem_mfbo.simulations import config
 
 
 def save_results(

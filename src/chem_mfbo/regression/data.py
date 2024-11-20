@@ -9,8 +9,8 @@ import pandas as pd
 import torch
 from joblib import Parallel, delayed
 
-from mf_kmc.simulations import config
-from mf_kmc.simulations.implementations.factory import sim_factory
+from chem_mfbo.simulations import config
+from chem_mfbo.simulations.implementations.factory import sim_factory
 
 
 def compute_points(

@@ -15,16 +15,16 @@ from botorch.optim.optimize import optimize_acqf_mixed
 from torch import Tensor
 from torch.quasirandom import SobolEngine
 
-from mf_kmc.optimization.acquisition import (
+from chem_mfbo.optimization.acquisition import (
     CostMultiFidelityEI,
     get_full_fidelity_recommendation,
     get_mfgibbon,
     get_mfkg,
     get_mfmes,
 )
-from mf_kmc.optimization.model import initialize_model
-from mf_kmc.optimization.optimizer_config import OptimizerConfig
-from mf_kmc.simulations.models.simulation_config import SimulationConfig
+from chem_mfbo.optimization.model import initialize_model
+from chem_mfbo.optimization.optimizer_config import OptimizerConfig
+from chem_mfbo.simulations.models.simulation_config import SimulationConfig
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)

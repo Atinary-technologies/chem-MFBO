@@ -10,7 +10,7 @@ from botorch.test_functions.multi_fidelity import AugmentedBranin
 from pydantic import BaseModel
 from torch import Tensor
 
-from mf_kmc.simulations.implementations.base import BaseSimulator
+from chem_mfbo.simulations.implementations.base import BaseSimulator
 
 
 class BraninInput(BaseModel):

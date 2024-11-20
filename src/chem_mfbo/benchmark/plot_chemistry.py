@@ -385,7 +385,7 @@ def extract_sr(
     result_col_name: str,
     fidelity_name: str,
     best: float = None,
-):
+) -> np.array:
     """Function to extract simple regret from a dataframe
     referred to budgets. It is necessary to refer the multi fidelity results to the
     single fidelity cost scale, so we can compare them and compute averages for all the
@@ -411,6 +411,7 @@ def extract_sr(
     hf_df = df.iloc[ind]
 
     # compute the simple regret at each step by substracting the result at each step to the best result
+    # this is only if you want to show the y scale in the target units
     if best:
         hf_df["sr"] = best - hf_df[result_col_name]
 
@@ -420,6 +421,7 @@ def extract_sr(
         # this series stores the simple regret at each step of the optimization
         sr_init = hf_df.groupby('step')['sr'].min().reset_index()
 
+    # else normal regret
     else:
         hf_df["sr"] = hf_df[result_col_name]
 

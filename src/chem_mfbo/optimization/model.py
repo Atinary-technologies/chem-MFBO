@@ -1,8 +1,6 @@
 # HERE ANY MODEL WE NEED FOR THE MF OPTIMIZATION
 import math
 from typing import Tuple
-
-import gpytorch
 import torch
 from botorch.models.gp_regression_fidelity import SingleTaskMultiFidelityGP
 from botorch.models.multitask import MultiTaskGP

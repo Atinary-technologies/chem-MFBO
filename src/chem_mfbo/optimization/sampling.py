@@ -6,7 +6,7 @@ from typing import Dict, List, Union
 import numpy as np
 from scipy.stats.qmc import LatinHypercube
 
-from mf_kmc.simulations.config import SimulationConfig
+from chem_mfbo.simulations.config import SimulationConfig
 
 
 def sample_points(

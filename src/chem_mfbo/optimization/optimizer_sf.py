@@ -27,8 +27,8 @@ from gpytorch.mlls import ExactMarginalLogLikelihood
 from gpytorch.priors.torch_priors import GammaPrior
 from torch import Tensor
 
-from mf_kmc.optimization.optimizer_config import OptimizerConfig
-from mf_kmc.simulations.models.simulation_config import SimulationConfig
+from chem_mfbo.optimization.optimizer_config import OptimizerConfig
+from chem_mfbo.simulations.models.simulation_config import SimulationConfig
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)

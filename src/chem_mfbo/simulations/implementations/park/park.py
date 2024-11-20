@@ -11,7 +11,7 @@ from botorch.test_functions.synthetic import SyntheticTestFunction
 from pydantic import BaseModel
 from torch import Tensor
 
-from mf_kmc.simulations.implementations.base import BaseSimulator
+from chem_mfbo.simulations.implementations.base import BaseSimulator
 
 
 class ParkInput(BaseModel):

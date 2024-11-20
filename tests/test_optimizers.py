@@ -6,9 +6,9 @@ import numpy as np
 import pytest
 import torch
 
-from mf_kmc.optimization.factory import optim_factory
-from mf_kmc.simulations import config
-from mf_kmc.simulations.config import get_optimizer_config, get_simulation_config
+from chem_mfbo.optimization.factory import optim_factory
+from chem_mfbo.simulations import config
+from chem_mfbo.simulations.config import get_optimizer_config, get_simulation_config
 
 
 @pytest.mark.parametrize(

@@ -7,7 +7,7 @@ __version__ = "0.0.0-beta"
 __author__ = "Atinary Technologies Inc. & Atinary Technologies Sarl"
 
 setup(
-    name="mf_kmc",
+    name="chem_mfbo",
     author=__author__,
     version=__version__,
     author_email="vsabanzagil@atinary.com",

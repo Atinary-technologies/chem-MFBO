@@ -2,7 +2,7 @@
 from abc import ABC, abstractmethod
 from typing import Any, Dict
 
-from mf_kmc.simulations.models.simulation_config import SimulationConfig
+from chem_mfbo.simulations.models.simulation_config import SimulationConfig
 
 
 class BaseSimulator(ABC):

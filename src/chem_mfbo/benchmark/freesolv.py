@@ -1,3 +1,4 @@
+"""Data taken from https://doi.org/10.1007/s10822-014-9747-x"""
 import os
 import random
 import shutil
@@ -28,7 +29,7 @@ from rdkit.Chem.Descriptors import CalcMolDescriptors
 from sklearn.decomposition import PCA
 from torch import Tensor
 
-from mf_kmc.optimization.acquisition import CostMultiFidelityEI
+from chem_mfbo.optimization.acquisition import CostMultiFidelityEI
 
 
 class FixedCostFids(AffineFidelityCostModel):
@@ -104,66 +105,39 @@ def data_to_input(path: str) -> pd.DataFrame:
     """Preprocess molecules from a given dataset and get
     tensors for computation with fps"""
 
-    columns = [
-        'ID',
-        'Compound',
-        'Formula',
-        'Charge',
-        'Multiplicity',
-        'CAS_no',
-        'ChemSpider_ID',
-        'PubChem_ID',
-        'Rotatable_Bonds',
-        'StdInChI',
-        'InChIkey',
-        'Spe1',
-        'Exp_Dipole',
-        'Error_Dipole',
-        'Ref_Dipole',
-        'HF_6_311G_Dipole',
-        'Sep2',
-        'Exp_pol',
-        'Error_Polarizability',
-        'Ref_Polarizability',
-        'HF_6_311G_pol',
-        'Sep3',
-        'Filename',
-    ]
+    df = pd.read_csv(path)
 
-    df = pd.read_csv(
-        path, delimiter='|', comment='#', skiprows=9, header=None, names=columns
-    )
-
-    # drop molecules that don't have polarizability values
-    df = df.dropna(subset="Exp_pol")
-
-    # transform SMILES into Inchi
-    df["smiles"] = df["StdInChI"].apply(inchi_to_smiles)
-
-    df = df[df['smiles'] != False]
-
-    # take only those who have an alkyl chain (organic molecules)
-    df = df[df['smiles'].apply(has_carbon)]
-
-    # take only SMILES, HF_6_311G_pol and DR columns
-    df = df[["HF_6_311G_pol", "Exp_pol", "smiles"]].reset_index()
-
-    # min max scale DR and SR
-    df["HF_6_311G_pol"] = (df["HF_6_311G_pol"] - df["HF_6_311G_pol"].min()) / (
-        df["HF_6_311G_pol"].max() - df["HF_6_311G_pol"].min()
-    )
-
-    df["Exp_pol"] = (df["Exp_pol"] - df["Exp_pol"].min()) / (
-        df["Exp_pol"].max() - df["Exp_pol"].min()
-    )
+    # take only SMILES, calc and DR columns
+    df = df[["calc", "expt", "smiles"]].reset_index()
 
     # encode fps
     X = torch.tensor(encode_descriptors(df["smiles"]), dtype=torch.float64)
 
-    y_lf = torch.tensor(df["HF_6_311G_pol"], dtype=torch.float64).unsqueeze(1)
-    y_hf = torch.tensor(df["Exp_pol"], dtype=torch.float64).unsqueeze(1)
+    y_lf = torch.tensor(-df["calc"], dtype=torch.float64).unsqueeze(1)
+    y_hf = torch.tensor(-df["expt"], dtype=torch.float64).unsqueeze(1)
 
     return X, y_hf, y_lf
+
+
+def diverse_set(X, seed_cof, train_size):
+    """Initialization method that takes a candidate randomly and then samples the most
+    diverse ones.
+    """
+    # initialize with one random point; pick others in a max diverse fashion
+    nb_COFs = X.shape[0]
+    ids_train = copy(seed_cof)
+    # select remaining training points
+    for j in range(train_size - 1):
+        # for each point in data set, compute its min dist to training set
+        dist_to_train_set = np.linalg.norm(X - X[ids_train, None, :], axis=2)
+        assert np.shape(dist_to_train_set) == (len(ids_train), nb_COFs)
+        min_dist_to_a_training_pt = np.min(dist_to_train_set, axis=0)
+        assert np.size(min_dist_to_a_training_pt) == nb_COFs
+
+        # acquire point with max(min distance to train set) i.e. Furthest from train set
+        ids_train.append(np.argmax(min_dist_to_a_training_pt))
+    assert np.size(np.unique(ids_train)) == train_size  # must be unique
+    return np.array(ids_train)
 
 
 def run_experiment(
@@ -173,7 +147,7 @@ def run_experiment(
     af_name: str = "MES",
     total_budget: int = 5,
     cost_ratio: float = 0.167,
-    lowfid: float = 0.62,
+    lowfid: float = 0.82,
 ):
 
     torch.manual_seed(seed)
@@ -188,9 +162,6 @@ def run_experiment(
 
     X_hf = torch.cat((X, torch.ones(X.size()[0], 1)), dim=1)
     X_lf = torch.cat((X, torch.ones(X.size()[0], 1) * lowfid), dim=1)
-
-    if cost_ratio == 0.5:
-        y_lf = y_lf + torch.randn(y_lf.size()) * 3
 
     budget = 0
 
@@ -312,7 +283,6 @@ def run_experiment(
         if mode == "random":
             # select best candidate randomly
             best = rng.integers(low=0, high=X_rest.size()[0], size=1)[0]
-            # best = rng.integers(0, X_rest.size())
 
         else:
             best = af(X_rest.unsqueeze(1)).argmax()
@@ -337,7 +307,7 @@ def run_experiment(
         budget += cost
 
     xs = pd.DataFrame(X_init.detach().numpy())
-    ys = pd.DataFrame(y_init.detach().numpy()).rename(columns={0: "Polarizability"})
+    ys = pd.DataFrame(y_init.detach().numpy()).rename(columns={0: "solvation"})
 
     results = pd.concat((xs, ys), axis=1)
 
@@ -354,28 +324,7 @@ def run_experiment(
     return results
 
 
-def diverse_set(X, seed_cof, train_size):
-    """Initialization method that takes a candidate randomly and then samples the most
-    diverse ones.
-    """
-    # initialize with one random point; pick others in a max diverse fashion
-    nb_COFs = X.shape[0]
-    ids_train = copy(seed_cof)
-    # select remaining training points
-    for j in range(train_size - 1):
-        # for each point in data set, compute its min dist to training set
-        dist_to_train_set = np.linalg.norm(X - X[ids_train, None, :], axis=2)
-        assert np.shape(dist_to_train_set) == (len(ids_train), nb_COFs)
-        min_dist_to_a_training_pt = np.min(dist_to_train_set, axis=0)
-        assert np.size(min_dist_to_a_training_pt) == nb_COFs
-
-        # acquire point with max(min distance to train set) i.e. Furthest from train set
-        ids_train.append(np.argmax(min_dist_to_a_training_pt))
-    assert np.size(np.unique(ids_train)) == train_size  # must be unique
-    return np.array(ids_train)
-
-
-@hydra.main(version_base=None, config_path="config", config_name="polarizability")
+@hydra.main(version_base=None, config_path="config", config_name="freesolv")
 def main(cfg: DictConfig) -> None:
 
     seeds = list(range(cfg.seeds))
@@ -425,6 +374,7 @@ def main(cfg: DictConfig) -> None:
                         seed=seed,
                         total_budget=cfg.budget,
                         cost_ratio=cfg.cost_ratio,
+                        lowfid=cfg.lowfid,
                     )
 
                     results.to_csv(f"{run_dir}/{seed}.csv")

@@ -1,6 +1,6 @@
 import numpy as np
 
-from mf_kmc.benchmark.plot_sweep import compute_area_difference
+from chem_mfbo.benchmark.plot_sweep import compute_area_difference
 
 
 def test_area_difference():

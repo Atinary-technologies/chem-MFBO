@@ -22,18 +22,19 @@ from botorch.models.transforms.outcome import Standardize
 from gpytorch.mlls import ExactMarginalLogLikelihood
 from joblib import Parallel, delayed
 from omegaconf import DictConfig
+from rdkit import Chem
+from rdkit.Chem import MACCSkeys
+from rdkit.Chem.Descriptors import CalcMolDescriptors
+from sklearn.decomposition import PCA
 from torch import Tensor
 
-from mf_kmc.optimization.acquisition import CostMultiFidelityEI
+from chem_mfbo.optimization.acquisition import CostMultiFidelityEI
 
 
 class FixedCostFids(AffineFidelityCostModel):
-    """Class to model specific Ising cost according to the polynomial fit of
-    the fidelities."""
+    """Class to model specific cost of the problem."""
 
-    def __init__(
-        self, fidelity_weights: Dict[int, float], fixed_cost=0, min_cost=0.065
-    ):
+    def __init__(self, fidelity_weights: Dict[int, float], fixed_cost=0, min_cost=0.5):
         super().__init__(fidelity_weights, fixed_cost)
         self.min_cost = min_cost
 
@@ -46,34 +47,133 @@ class FixedCostFids(AffineFidelityCostModel):
         return final_cost
 
 
-def diverse_set(X, seed_cof, train_size):
-    """Initialization method that takes a candidate randomly and then samples the most
-    diverse ones.
-    """
-    # initialize with one random point; pick others in a max diverse fashion
-    nb_COFs = X.shape[0]
-    ids_train = copy(seed_cof)
-    # select remaining training points
-    for j in range(train_size - 1):
-        # for each point in data set, compute its min dist to training set
-        dist_to_train_set = np.linalg.norm(X - X[ids_train, None, :], axis=2)
-        assert np.shape(dist_to_train_set) == (len(ids_train), nb_COFs)
-        min_dist_to_a_training_pt = np.min(dist_to_train_set, axis=0)
-        assert np.size(min_dist_to_a_training_pt) == nb_COFs
+def encode_fps(smiles: list[str]) -> np.array:
+    """Encode SMILES as fps"""
 
-        # acquire point with max(min distance to train set) i.e. Furthest from train set
-        ids_train.append(np.argmax(min_dist_to_a_training_pt))
-    assert np.size(np.unique(ids_train)) == train_size  # must be unique
-    return np.array(ids_train)
+    mols = [Chem.MolFromSmiles(smile) for smile in smiles]
+
+    fps = np.array([MACCSkeys.GenMACCSKeys(mol) for mol in mols])
+
+    pca = PCA(n_components=20)
+
+    fps = pca.fit_transform(fps)
+
+    fps = (fps - np.min(fps, axis=0)) / (np.max(fps, axis=0) - np.min(fps, axis=0))
+
+    return fps
+
+
+def encode_descriptors(smiles: list[str]) -> np.array:
+    """Encode SMILES as descriptors"""
+
+    mols = [Chem.MolFromSmiles(smile) for smile in smiles]
+
+    desc = [CalcMolDescriptors(mol) for mol in mols]
+
+    desc_df = pd.DataFrame(desc)
+
+    desc_arr = desc_df.to_numpy()
+
+    pca = PCA(n_components=10)
+
+    fps = pca.fit_transform(desc_arr)
+
+    fps = (fps - np.min(fps, axis=0)) / (np.max(fps, axis=0) - np.min(fps, axis=0))
+
+    return fps
+
+
+def inchi_to_smiles(inchi: str) -> str:
+    """Transform Inchi into SMILES"""
+    try:
+        smiles = Chem.MolToSmiles(Chem.MolFromInchi(inchi))
+        return smiles
+    except:
+        return False
+
+
+def has_carbon(smiles: str) -> bool:
+    """Check if molecule contains the alkyl motif"""
+    mol = Chem.MolFromSmiles(smiles)
+    carb = mol.HasSubstructMatch(Chem.MolFromSmarts("[#6][#6]"))
+
+    return carb
+
+
+def data_to_input(path: str) -> pd.DataFrame:
+    """Preprocess molecules from a given dataset and get
+    tensors for computation with fps"""
+
+    columns = [
+        'ID',
+        'Compound',
+        'Formula',
+        'Charge',
+        'Multiplicity',
+        'CAS_no',
+        'ChemSpider_ID',
+        'PubChem_ID',
+        'Rotatable_Bonds',
+        'StdInChI',
+        'InChIkey',
+        'Spe1',
+        'Exp_Dipole',
+        'Error_Dipole',
+        'Ref_Dipole',
+        'HF_6_311G_Dipole',
+        'Sep2',
+        'Exp_pol',
+        'Error_Polarizability',
+        'Ref_Polarizability',
+        'HF_6_311G_pol',
+        'Sep3',
+        'Filename',
+    ]
+
+    df = pd.read_csv(
+        path, delimiter='|', comment='#', skiprows=9, header=None, names=columns
+    )
+
+    # drop molecules that don't have polarizability values
+    df = df.dropna(subset="Exp_pol")
+
+    # transform SMILES into Inchi
+    df["smiles"] = df["StdInChI"].apply(inchi_to_smiles)
+
+    df = df[df['smiles'] != False]
+
+    # take only those who have an alkyl chain (organic molecules)
+    df = df[df['smiles'].apply(has_carbon)]
+
+    # take only SMILES, HF_6_311G_pol and DR columns
+    df = df[["HF_6_311G_pol", "Exp_pol", "smiles"]].reset_index()
+
+    # min max scale DR and SR
+    df["HF_6_311G_pol"] = (df["HF_6_311G_pol"] - df["HF_6_311G_pol"].min()) / (
+        df["HF_6_311G_pol"].max() - df["HF_6_311G_pol"].min()
+    )
+
+    df["Exp_pol"] = (df["Exp_pol"] - df["Exp_pol"].min()) / (
+        df["Exp_pol"].max() - df["Exp_pol"].min()
+    )
+
+    # encode fps
+    X = torch.tensor(encode_descriptors(df["smiles"]), dtype=torch.float64)
+
+    y_lf = torch.tensor(df["HF_6_311G_pol"], dtype=torch.float64).unsqueeze(1)
+    y_hf = torch.tensor(df["Exp_pol"], dtype=torch.float64).unsqueeze(1)
+
+    return X, y_hf, y_lf
 
 
 def run_experiment(
+    path: str,
     mode: str = "mf",
     seed: int = 33,
     af_name: str = "MES",
     total_budget: int = 5,
-    cost_ratio: float = 0.065,
-    lowfid=0.85,
+    cost_ratio: float = 0.167,
+    lowfid: float = 0.62,
 ):
 
     torch.manual_seed(seed)
@@ -84,34 +184,23 @@ def run_experiment(
         cost_model = FixedCostFids(fidelity_weights={-1: 1.0}, min_cost=cost_ratio)
         cost_aware = InverseCostWeightedUtility(cost_model=cost_model)
 
-    df = pd.read_csv("data/converted_data_raw.csv")
-
-    f_names = df.columns[1:15]
-
-    df[f_names] = (df[f_names] - df[f_names].min()) / (
-        df[f_names].max() - df[f_names].min()
-    )
-
-    df[f_names]
-
-    X = torch.tensor(df[f_names].to_numpy())
-    y_hf = torch.tensor(df['gcmc_y']).unsqueeze(1)
-    y_lf = torch.tensor(df['henry_y']).unsqueeze(1)
+    X, y_hf, y_lf = data_to_input(path)
 
     X_hf = torch.cat((X, torch.ones(X.size()[0], 1)), dim=1)
     X_lf = torch.cat((X, torch.ones(X.size()[0], 1) * lowfid), dim=1)
 
+    if cost_ratio == 0.5:
+        y_lf = y_lf + torch.randn(y_lf.size()) * 3
+
     budget = 0
 
-    # same initialization strategy than them (sample one random cofs and then select diverse ones)
-
-    init_cof = [rng.integers(0, 608)]
+    init_sample = [rng.integers(0, X.shape[0])]
 
     if mode == "sf" or mode == "random":
-        indices_hf = diverse_set(X, init_cof, 3)
+        indices_hf = diverse_set(X, init_sample, 3)
 
     else:
-        indices_hf = diverse_set(X, init_cof, 2)
+        indices_hf = diverse_set(X, init_sample, 2)
 
     indices_lf = rng.integers(0, 608, round(1 / cost_ratio))
 
@@ -134,7 +223,6 @@ def run_experiment(
     X_init = torch.cat((X_lf_init, X_hf_init))
     y_init = torch.cat((y_sf_init, y_mf_init))
 
-    # the rest
     X_rest = torch.cat((X_hf_rest, X_lf_rest))
     y_rest = torch.cat((y_hf_rest, y_lf_rest))
 
@@ -144,10 +232,10 @@ def run_experiment(
         y_init = y_mf_init
         y_rest = y_hf_rest
 
-    steps = [0, 0, 0]
+    steps = [0] * X_hf_init.size()[0]
 
     if mode == "mf":
-        steps = [0, 0] + [0] * len(indices_lf)
+        steps = [0] * (X_hf_init.size()[0]) + [0] * len(indices_lf)
 
     step = 0
 
@@ -173,11 +261,11 @@ def run_experiment(
             fit_gpytorch_mll(mll)
 
             if af_name == "MES":
-                sampler = torch.quasirandom.SobolEngine(dimension=14)
+                sampler = torch.quasirandom.SobolEngine(dimension=X.shape[1])
 
-                candidates = sampler.draw(1000)
+                candidates = sampler.draw(2000)
 
-                candidates = torch.cat((candidates, torch.ones(1000, 1)), dim=1)
+                candidates = torch.cat((candidates, torch.ones(2000, 1)), dim=1)
 
                 af = qMultiFidelityMaxValueEntropy(
                     model,
@@ -203,7 +291,7 @@ def run_experiment(
 
             if af_name == "MES":
 
-                sampler = torch.quasirandom.SobolEngine(dimension=14)
+                sampler = torch.quasirandom.SobolEngine(dimension=X.shape[1])
 
                 candidates = sampler.draw(2000)
 
@@ -222,7 +310,9 @@ def run_experiment(
                 af = ExpectedImprovement(model=model, best_f=best_y)
 
         if mode == "random":
-            best = rng.integers(0, X_rest.size()[0])
+            # select best candidate randomly
+            best = rng.integers(low=0, high=X_rest.size()[0], size=1)[0]
+            # best = rng.integers(0, X_rest.size())
 
         else:
             best = af(X_rest.unsqueeze(1)).argmax()
@@ -247,21 +337,45 @@ def run_experiment(
         budget += cost
 
     xs = pd.DataFrame(X_init.detach().numpy())
-    ys = pd.DataFrame(y_init.detach().numpy())
+    ys = pd.DataFrame(y_init.detach().numpy()).rename(columns={0: "Polarizability"})
 
     results = pd.concat((xs, ys), axis=1)
 
-    results.columns = list(f_names) + ["fidelity", "selectivity"]
+    results.rename(columns={X.shape[1]: "fidelity"}, inplace=True)
+
     results["step"] = steps
 
-    results["cost"] = results["fidelity"].apply(lambda x: 1 if x == 1.0 else cost_ratio)
+    results["cost"] = results["fidelity"].apply(
+        lambda x: 1 if x == 1.0 else cost_model.min_cost
+    )
 
-    # assert not results.duplicated().any(), "Df contains duplicates"
+    assert not results.duplicated().any(), "Df contains duplicates"
 
     return results
 
 
-@hydra.main(version_base=None, config_path="config", config_name="cofs")
+def diverse_set(X, seed_cof, train_size):
+    """Initialization method that takes a candidate randomly and then samples the most
+    diverse ones.
+    """
+    # initialize with one random point; pick others in a max diverse fashion
+    nb_COFs = X.shape[0]
+    ids_train = copy(seed_cof)
+    # select remaining training points
+    for j in range(train_size - 1):
+        # for each point in data set, compute its min dist to training set
+        dist_to_train_set = np.linalg.norm(X - X[ids_train, None, :], axis=2)
+        assert np.shape(dist_to_train_set) == (len(ids_train), nb_COFs)
+        min_dist_to_a_training_pt = np.min(dist_to_train_set, axis=0)
+        assert np.size(min_dist_to_a_training_pt) == nb_COFs
+
+        # acquire point with max(min distance to train set) i.e. Furthest from train set
+        ids_train.append(np.argmax(min_dist_to_a_training_pt))
+    assert np.size(np.unique(ids_train)) == train_size  # must be unique
+    return np.array(ids_train)
+
+
+@hydra.main(version_base=None, config_path="config", config_name="polarizability")
 def main(cfg: DictConfig) -> None:
 
     seeds = list(range(cfg.seeds))
@@ -286,6 +400,7 @@ def main(cfg: DictConfig) -> None:
 
                 results_list = Parallel(n_jobs=-1)(
                     delayed(run_experiment)(
+                        cfg.name,
                         mode=mode,
                         af_name=af_name,
                         seed=seed,
@@ -304,12 +419,12 @@ def main(cfg: DictConfig) -> None:
                 for seed in seeds:
 
                     results = run_experiment(
+                        cfg.name,
                         mode=mode,
                         af_name=af_name,
                         seed=seed,
                         total_budget=cfg.budget,
                         cost_ratio=cfg.cost_ratio,
-                        lowfid=cfg.lowfid,
                     )
 
                     results.to_csv(f"{run_dir}/{seed}.csv")
