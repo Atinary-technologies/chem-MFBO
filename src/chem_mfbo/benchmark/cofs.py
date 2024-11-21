@@ -261,7 +261,7 @@ def run_experiment(
     return results
 
 
-@hydra.main(version_base=None, config_path="config", config_name="cofs")
+@hydra.main(version_base=None, config_path="../../../config_bench", config_name="cofs")
 def main(cfg: DictConfig) -> None:
 
     seeds = list(range(cfg.seeds))

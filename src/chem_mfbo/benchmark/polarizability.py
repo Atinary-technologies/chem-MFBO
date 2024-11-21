@@ -375,7 +375,7 @@ def diverse_set(X, seed_cof, train_size):
     return np.array(ids_train)
 
 
-@hydra.main(version_base=None, config_path="config", config_name="polarizability")
+@hydra.main(version_base=None, config_path="../../../config_bench", config_name="polarizability")
 def main(cfg: DictConfig) -> None:
 
     seeds = list(range(cfg.seeds))
