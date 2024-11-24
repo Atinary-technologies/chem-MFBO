@@ -1,6 +1,7 @@
-path: [benchmark_results_hydra/20241010213909_synthetic_benchmark]
-simulations: [branin]
-optimizers: [mes, ei]
+path: [benchmark_results_hydra/20241122141026_synthetic_benchmark,
+benchmark_results_hydra/20241122150341_synthetic_benchmark]
+simulations: [branin, park]
+optimizers: [ei, mes]
 constraints:
 plot_path: plots/synthetic_results
 

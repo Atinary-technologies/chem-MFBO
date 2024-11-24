@@ -29,7 +29,8 @@ setup(
         "scipy==1.12.0",
         "scikit-learn==1.2.0",
         "plotly",
-        "rdkit"
+        "rdkit",
+        "seaborn"
         # any other ones here
     ],
 )

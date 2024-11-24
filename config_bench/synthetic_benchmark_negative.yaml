@@ -9,13 +9,14 @@ hydra:
     subdir: ${hydra.job.override_dirname}
 
 budget: 30
-n_repeats: 8
+n_repeats: 20
 batch_size: 1
 init_samples_budget: 0.1
 low_fid_samps_ratio: 0.6666
-lowfid_kernel: 0.0
+lowfid_kernel: 0.8
 bias_lowfid: 0.0
 cost_ratio: 0.5
 parallel: True
+multitask: False
 optimizer: single_fidelity_ei
 simulation: hartmann

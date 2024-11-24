@@ -22,7 +22,7 @@ class CostMultiFidelityEI(ExpectedImprovement):
 
     ref: https://link.springer.com/content/pdf/10.1007/s00158-005-0587-0.pdf"""
 
-    def __init__(self, model, best_f, cost_model, multitask=True, **kwargs):
+    def __init__(self, model, best_f, cost_model, multitask=False, **kwargs):
         if multitask:
             posterior_transform = ScalarizedPosteriorTransform(torch.tensor([1]))
             super().__init__(

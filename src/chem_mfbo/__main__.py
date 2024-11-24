@@ -5,6 +5,7 @@ from typing import Any, Dict
 
 import numpy as np
 import torch
+import warnings
 
 from chem_mfbo.optimization.factory import optim_factory
 from chem_mfbo.optimization.sampling import sample_points
@@ -13,6 +14,9 @@ from chem_mfbo.simulations.implementations.factory import sim_factory
 
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
+
+#suppress RunTime warning for the EI optimization
+warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 
 def run(
