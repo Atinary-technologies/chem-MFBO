@@ -9,7 +9,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
 from sklearn.model_selection import train_test_split
 
-from mf_kmc.simulations.implementations.park.park import Park
+from chem_mfbo.simulations.implementations.park.park import Park
 
 torch.manual_seed(33)
 

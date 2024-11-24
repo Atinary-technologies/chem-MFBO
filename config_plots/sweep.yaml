@@ -1,8 +1,8 @@
 path: benchmark_results_hydra_cluster/20240829120340_synthetic_sweep
 simulations: [branin, park]
-optimizers: [mes, ei]
+optimizers: [ei, mes]
 parameters: lowfid_kernel, cost_ratio
-extract: True
+extract: False
 plot: True
 
 hydra:

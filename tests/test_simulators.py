@@ -2,9 +2,9 @@
 import pytest
 import torch
 
-from mf_kmc.simulations import config
-from mf_kmc.simulations.config import get_simulation_config
-from mf_kmc.simulations.implementations.factory import sim_factory
+from chem_mfbo.simulations import config
+from chem_mfbo.simulations.config import get_simulation_config
+from chem_mfbo.simulations.implementations.factory import sim_factory
 
 
 @pytest.fixture(scope="session", autouse=True)

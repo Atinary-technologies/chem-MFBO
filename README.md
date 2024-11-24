@@ -4,7 +4,9 @@ In this repository, we run an investigation of Multi-fidelity Bayesian Optimizat
 
 We first conduct some benchmarks with 2 different acquisition functions and 2 synthetic functions. We also study the parameters favoring the MF approach over the standard single fidelity (SFBO).
 
-We run 3 benchmarks in the chemical domain (optimization of Covalent Organic Frameworks (COFs), polarizable molecules and molecule solvation energy). Our study shows how MFBO can effectively reduce the overall cost of optimization tasks.
+We run 3 benchmarks in the chemical domain (optimization of Covalent Organic Frameworks (COFs), polarizable molecules and molecule solvation energy). Our study shows how MFBO can effectively reduce the overall cost of optimization tasks and provide guidelines for using this method.
+
+📄 The corresponding paper can be found [here](https://arxiv.org/abs/2410.00544)
 
 ![](fig1.png)
 
@@ -15,11 +17,9 @@ Create a new environment
 ```
 python -m venv venv
 ```
-Activate the environment and install the package (make sure that you install `summit` first)
+Activate the environment and install the package
 ```
 source venv/bin/activate
-
-pip install summit
 
 pip install .
 ```
@@ -51,17 +51,30 @@ python src/mf_kmc/benchmark/polarizability.py
 python src/mf_kmc/benchmark/freesolv.py
 ```
 
-The negative cases can be launched with this commands
+The negative case can be launched with this commands
 
 ```
 python src/mf_kmc/benchmark/polarizability.py --config-name=polarizability_bad
 ```
 
-### 📈 Plotting
+### 📈 Plotting and metrics
 To plot the benchmarks results, include the corresponding results path in the `path` option of the corresponding plotting config file included in `config_plots/` and run the associated plotting script. As an example, the synthetic functions benchmark can be run with:
 
 ```
 python src/mf_kmc/benchmark/plot_synthetic.py
+```
+
+### 📄 Citation
+```
+@misc{sabanzagil2024bestpracticesmultifidelitybayesian,
+      title={Best Practices for Multi-Fidelity Bayesian Optimization in Materials and Molecular Research}, 
+      author={Víctor Sabanza-Gil and Riccardo Barbano and Daniel Pacheco Gutiérrez and Jeremy S. Luterbacher and José Miguel Hernández-Lobato and Philippe Schwaller and Loïc Roch},
+      year={2024},
+      eprint={2410.00544},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2410.00544}, 
+}
 ```
 
 ### 🌟 Acknowledgements
