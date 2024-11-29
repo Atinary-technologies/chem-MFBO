@@ -43,18 +43,10 @@ Additionally, the sweep over synthetic functions can be run via
 python src/mf_kmc/benchmark/benchmark.py --config-name=synthetic_sweep.yaml
 ```
 
-The benchmarks for chemistry and materials design can be reproduced launching the following commands
+The benchmarks for chemistry and materials design can be reproduced using the corresponding `.sh` file
 
 ```
-python src/mf_kmc/benchmark/cofs.py
-python src/mf_kmc/benchmark/polarizability.py
-python src/mf_kmc/benchmark/freesolv.py
-```
-
-The negative case can be launched with this commands
-
-```
-python src/mf_kmc/benchmark/polarizability.py --config-name=polarizability_bad
+./chemistry_benchmarks.sh
 ```
 
 ### 📈 Plotting and metrics
