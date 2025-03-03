@@ -5,7 +5,7 @@ hydra:
       lowfid: 0.333333
 
   sweep:
-    dir: benchmark/results_freesolv
+    dir: benchmark/results_bandgap
     subdir: ${hydra.job.override_dirname}
 
 
@@ -18,6 +18,6 @@ sampling_budget: 0.1
 lowfid: 0.333333
 highfid: 0.666666
 noise: 0
-data_type: molecular
-file_path: data/clean/freesolv.csv
+data_type: material
+file_path: data/clean/bandgap.csv
 parallel: True

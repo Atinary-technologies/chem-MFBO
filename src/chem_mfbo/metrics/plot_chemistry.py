@@ -188,7 +188,8 @@ def plot_benchmark_real_problems(
 
         plt.grid(0.8, which="both")
         plt.xlim(0, max(budgets))
-        plt.legend(loc='lower right')
+        
+        plt.legend(loc='upper right')
         plt.title(f"{simulation}", fontsize=30)
 
         # Remove upper and right spines

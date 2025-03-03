@@ -71,6 +71,15 @@ def polarizability_to_input(path: str) -> pd.DataFrame:
     # rename columns
     df = df.rename(columns={"Exp_pol": "HF", "HF_6_311G_pol": "LF"})
 
+    # min max scale HF and SF
+    df["HF"] = (df["HF"] - df["HF"].min()) / (
+        df["HF"].max() - df["HF"].min()
+    )
+
+    df["LF"] = (df["LF"] - df["LF"].min()) / (
+        df["LF"].max() - df["LF"].min()
+    )
+
     return df
 
 

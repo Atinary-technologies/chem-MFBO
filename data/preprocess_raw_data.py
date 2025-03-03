@@ -33,6 +33,10 @@ if __name__ == "__main__":
 
             df = df.rename(columns={"expt": "HF", "calc": "LF"})
 
+            # we want to find the optimum, but the energy is negative, so we invert it
+            df["HF"] = df["HF"] * -1
+            df["LF"] = df["LF"] * -1
+
             name = "freesolv"
 
         elif file == "polarizability.csv":
@@ -56,6 +60,11 @@ if __name__ == "__main__":
         elif file == "Bandgap_data_withfeatures_CLEANED_2022-08-26.csv":
             
             df = bandgap_to_input(os.path.join(raw_dir, file))
+
+            # remove 0 values
+            df = df[df["HF"] != 0]
+            
+            df = df.sample(1000, random_state=33)
 
             name = "bandgap"
         

@@ -1,6 +1,7 @@
 path: benchmark
-simulations: [polarizability, cofs, freesolv]
+simulations: [polarizability, freesolv, cofs, bandgap]
 optimizers: [mf_MES, sf_MES, mf_EI, sf_EI, random]
+
 constraints:
 plots_path: plots/chemistry
 

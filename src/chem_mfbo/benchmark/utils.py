@@ -22,8 +22,14 @@ class FixedCostFids(AffineFidelityCostModel):
     def forward(self, X: Tensor):
 
         fids = X[..., -1]
+        
+        max_fid = max(fids).item() 
 
-        final_cost = torch.where(fids != 1.0, self.min_cost, fids)
+        final_cost = torch.where(fids != max_fid, self.min_cost, fids)
+
+        final_cost = torch.where(fids == max_fid, 1.0, fids)
+
+        #final_cost = torch.where(fids != 1.0, self.min_cost, fids)
 
         return final_cost
 
