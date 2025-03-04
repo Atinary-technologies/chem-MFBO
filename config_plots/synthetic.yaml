@@ -1,5 +1,6 @@
-path: [benchmark_results_hydra/20241122141026_synthetic_benchmark,
-benchmark_results_hydra/20241122150341_synthetic_benchmark]
+path: [benchmark_results_hydra/20250304105114_synthetic_benchmark,
+benchmark_results_hydra/20250304110527_synthetic_benchmark,
+benchmark_results_hydra/20250304111508_synthetic_benchmark]
 simulations: [branin, park]
 optimizers: [ei, mes]
 constraints:

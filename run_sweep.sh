@@ -5,4 +5,4 @@
 #SBATCH --cpus-per-task=25
 #SBATCH --mem=32G
 source venv/bin/activate # Activate your virtual environment
-python src/mf_kmc/benchmark/benchmark.py hydra/launcher=submitit_slurm --config-name=synthetic_sweep_cluster.yaml
+python src/chem_mfbo/benchmark/benchmark.py hydra/launcher=submitit_slurm --config-name=synthetic_sweep_cluster.yaml
