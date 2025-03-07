@@ -2,7 +2,6 @@
 
 import math
 import os
-
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
@@ -99,7 +98,10 @@ def sample_test(n_samples: int) -> tuple[torch.Tensor]:
 
 
 def train_predict_model(
-    X_train: torch.Tensor, y_train: torch.Tensor, X_test: torch.Tensor, mt: bool = False
+    X_train: torch.Tensor, 
+    y_train: torch.Tensor, 
+    X_test: torch.Tensor, 
+    mt: bool = False
 ) -> torch.Tensor:
     """Train models and predict on test set. If mt = True, use MultiTask, use
     SingleTaskMultiFidelityGP otherwise.
