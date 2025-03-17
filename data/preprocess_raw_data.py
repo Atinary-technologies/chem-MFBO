@@ -64,7 +64,7 @@ if __name__ == "__main__":
             # remove 0 values
             df = df[df["HF"] != 0]
             
-            df = df.sample(1000, random_state=33)
+            #df = df.sample(1000, random_state=33)
 
             name = "bandgap"
         

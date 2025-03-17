@@ -11,8 +11,6 @@ from rdkit import Chem
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
 from sklearn.model_selection import train_test_split
-from summit.benchmarks import MIT_case2
-from summit.domain import *
 
 
 def load_ys(problem: str, n_samps: int = 100, seed: int = 33):
@@ -103,25 +101,6 @@ def has_carbon(smiles: str) -> bool:
     carb = mol.HasSubstructMatch(Chem.MolFromSmarts("[#6][#6]"))
 
     return carb
-
-
-class SimpleSampler:
-    def __init__(self, domain, seed=None):
-        self.domain = domain
-        self.rng = np.random.default_rng(seed)
-
-    def sample(self, n_samples):
-        samples = {}
-        for var in self.domain.input_variables:
-            if isinstance(var, ContinuousVariable):
-                samples[var.name] = self.rng.uniform(
-                    var.bounds[0], var.bounds[1], n_samples
-                )
-            elif isinstance(var, CategoricalVariable):
-                samples[var.name] = self.rng.choice(var.levels, n_samples)
-            else:
-                raise ValueError(f"Unsupported variable type: {type(var)}")
-        return pd.DataFrame(samples)
 
 
 DATASETS = ["cofs", "freesolv", "polarizability", "polarizability_neg"]

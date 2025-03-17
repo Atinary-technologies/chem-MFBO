@@ -24,6 +24,7 @@ from chem_mfbo.optimization.acquisition import CostMultiFidelityEI
 from chem_mfbo.benchmark.utils import FixedCostFids, encode_descriptors, diverse_set
 
 
+
 def load_and_preprocess_data(file_path: str, data_type: str):
     df = pd.read_csv(file_path)
     
@@ -255,7 +256,7 @@ def run_experiment(
     return results
 
 
-@hydra.main(version_base=None, config_path="../../../config_bench", config_name="bandgap")
+@hydra.main(version_base=None, config_path="../../../config_bench", config_name="cofs")
 def main(cfg: DictConfig) -> None:
 
     seeds = list(range(cfg.seeds))

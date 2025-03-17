@@ -29,8 +29,6 @@ class FixedCostFids(AffineFidelityCostModel):
 
         final_cost = torch.where(fids == max_fid, 1.0, fids)
 
-        #final_cost = torch.where(fids != 1.0, self.min_cost, fids)
-
         return final_cost
 
 

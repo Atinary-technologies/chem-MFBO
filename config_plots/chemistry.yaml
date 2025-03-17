@@ -1,5 +1,5 @@
 path: benchmark
-simulations: [polarizability, freesolv, cofs, bandgap]
+simulations: [polarizability, freesolv, cofs]
 optimizers: [mf_MES, sf_MES, mf_EI, sf_EI, random]
 
 constraints:

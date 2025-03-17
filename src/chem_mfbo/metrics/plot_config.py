@@ -74,11 +74,6 @@ PROBLEM_CONFIG = {
         "result_col_name": "output",
         "fidelity_name": "fidelity",
     },
-    "bandgap": {
-    "optimum": 10.236591,
-    "result_col_name": "output",
-    "fidelity_name": "fidelity",
-    },
 }
 
 
