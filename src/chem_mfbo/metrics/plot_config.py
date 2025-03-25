@@ -3,12 +3,6 @@ import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import numpy as np
 
-
-# plot_config.py
-import matplotlib.cm as cm
-import matplotlib.pyplot as plt
-import numpy as np
-
 # Matplotlib plotting parameters
 def configure_plotting():
     plt.rcParams.update({
@@ -66,18 +60,18 @@ LINESTYLE = {
 # Problem-specific configurations
 PROBLEM_CONFIG = {
     "cofs": {
-        "optimum": 18.56,
-        "result_col_name": "selectivity",
+        "optimum": 18.534,
+        "result_col_name": "output",
         "fidelity_name": "fidelity",
     },
     "polarizability": {
         "optimum": 1.0,
-        "result_col_name": "Polarizability",
+        "result_col_name": "output",
         "fidelity_name": "fidelity",
     },
     "freesolv": {
         "optimum": 25.47,
-        "result_col_name": "solvation",
+        "result_col_name": "output",
         "fidelity_name": "fidelity",
     },
 }

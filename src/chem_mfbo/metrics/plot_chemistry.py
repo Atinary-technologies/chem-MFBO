@@ -75,11 +75,7 @@ def plot_benchmark_real_problems(
         cumcost = df_example.groupby('step')['cost'].sum().cumsum()
 
         # real scale for plotting the x axis
-        budget_steps = cumcost.values[:36]
-
-        # files = [file for file in files]
-
-        # sim_files = sorted(files)
+        budget_steps = cumcost.values
 
         # this is to plot query frequency
         mean_queries = []
@@ -188,7 +184,8 @@ def plot_benchmark_real_problems(
 
         plt.grid(0.8, which="both")
         plt.xlim(0, max(budgets))
-        plt.legend(loc='lower right')
+        
+        plt.legend(loc='upper right')
         plt.title(f"{simulation}", fontsize=30)
 
         # Remove upper and right spines

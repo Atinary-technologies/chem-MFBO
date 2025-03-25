@@ -35,12 +35,12 @@ pip install hydra-submitit-launcher --upgrade
 If you want to launch the synthetic functions benchmark, use this command
 
 ```
-python src/mf_kmc/benchmark/benchmark.py
+python src/chem_mfbo/benchmark/benchmark.py
 ```
 Additionally, the sweep over synthetic functions can be run via
 
 ```
-python src/mf_kmc/benchmark/benchmark.py --config-name=synthetic_sweep.yaml
+python src/chem_mfbo/benchmark/benchmark.py --config-name=synthetic_sweep.yaml
 ```
 
 The benchmarks for chemistry and materials design can be reproduced using the corresponding `.sh` file
@@ -53,8 +53,9 @@ The benchmarks for chemistry and materials design can be reproduced using the co
 To plot the benchmarks results, include the corresponding results path in the `path` option of the corresponding plotting config file included in `config_plots/` and run the associated plotting script. As an example, the synthetic functions benchmark can be run with:
 
 ```
-python src/mf_kmc/benchmark/plot_synthetic.py
+python src/chem_mfbo/benchmark/plot_synthetic.py
 ```
+
 
 ### 📄 Citation
 ```

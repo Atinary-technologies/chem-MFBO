@@ -2,7 +2,7 @@ hydra:
   mode: MULTIRUN
   sweeper:
     params:
-      lowfid: 0.0
+      lowfid: 0.333333
 
   sweep:
     dir: benchmark/results_cofs
@@ -13,6 +13,11 @@ modes: [mf, sf, random]
 af_names: [EI, MES]
 cost_ratio: 0.065
 seeds: 20
-budget: 27
-lowfid: 0.0
+budget: 30
+sampling_budget: 0.1
+lowfid: 0.333333
+highfid: 0.666666
+noise: 0
+data_type: material
+file_path: data/clean/cofs.csv
 parallel: True

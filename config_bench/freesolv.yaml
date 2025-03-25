@@ -2,19 +2,22 @@ hydra:
   mode: MULTIRUN
   sweeper:
     params:
-      lowfid: 0.0
+      lowfid: 0.333333
 
   sweep:
     dir: benchmark/results_freesolv
     subdir: ${hydra.job.override_dirname}
 
 
-
 modes: [mf, sf, random]
 af_names: [MES, EI]
 cost_ratio: 0.1
 seeds: 20
-budget: 27
-lowfid: 0.0
+budget: 50
+sampling_budget: 0.1
+lowfid: 0.333333
+highfid: 0.666666
+noise: 0
+data_type: molecular
+file_path: data/clean/freesolv.csv
 parallel: True
-name: data/freesolv.csv

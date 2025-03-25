@@ -25,9 +25,11 @@ init_samples_budget: 0.1
 low_fid_samps_ratio: 0.666
 cost_ratio: 0.1
 bias_lowfid: 0.2
-lowfid_kernel: 0.0
+lowfid_kernel: 0.333333
+highfid_kernel: 0.666666
 optimizer: single_fidelity_ei
 simulation: park
+multitask: False
 
 timeout_min: 360
 cpus_per_task: 25

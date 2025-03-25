@@ -1,4 +1,4 @@
-path: benchmark_results_hydra_cluster/20240826175538_synthetic_kernel
+path: benchmark_results_hydra/20250303202731_synthetic_benchmark
 simulations: [branin]
 optimizers: [mes, ei]
 constraints:
